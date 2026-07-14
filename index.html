@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>内容工厂 · 夏日选题到发布</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sand:#FFF6E7;
+    --card:#FFFDF8;
+    --ink:#23303A;
+    --coral:#FF6F5E;
+    --mango:#FFA945;
+    --lagoon:#1E9C93;
+    --sun:#FFD966;
+    --line:rgba(35,48,58,0.10);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--sand);
+    color:var(--ink);
+    font-family:'DM Sans',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:'Fraunces',serif; margin:0; letter-spacing:-0.01em;}
+  .eyebrow{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--lagoon);
+    font-weight:700;
+  }
+  .wrap{max-width:640px; margin:0 auto; padding:0 20px;}
+
+  /* progress tide bar */
+  #tide{
+    position:fixed; top:0; left:0; height:3px; width:0%;
+    background:linear-gradient(90deg,var(--sun),var(--coral));
+    z-index:100; transition:width .05s linear;
+  }
+  header.top{
+    position:sticky; top:0; z-index:90;
+    backdrop-filter:blur(8px);
+    background:rgba(255,246,231,0.85);
+    border-bottom:1px solid var(--line);
+    padding:10px 20px 8px;
+  }
+  .brand{display:flex; align-items:center; justify-content:space-between;}
+  .brand-name{font-family:'Fraunces',serif; font-weight:700; font-size:16px;}
+  .steps-nav{
+    display:flex; gap:8px; overflow-x:auto; padding:10px 0 2px;
+    scrollbar-width:none;
+  }
+  .steps-nav::-webkit-scrollbar{display:none;}
+  .chip{
+    flex:0 0 auto;
+    font-family:'Space Mono',monospace;
+    font-size:12px; font-weight:700;
+    padding:6px 12px; border-radius:999px;
+    background:#fff; border:1px solid var(--line);
+    color:var(--ink); text-decoration:none;
+    white-space:nowrap;
+  }
+  .chip:active{background:var(--sun);}
+
+  /* hero */
+  .hero{
+    padding:38px 20px 60px;
+    position:relative; overflow:hidden;
+    background:radial-gradient(120% 90% at 15% 0%, #FFE8C2 0%, var(--sand) 60%);
+  }
+  .hero h1{font-size:38px; line-height:1.12; font-weight:700;}
+  .hero h1 em{font-style:normal; color:var(--coral);}
+  .hero p{font-size:15px; line-height:1.6; color:#4b5860; max-width:46ch; margin-top:14px;}
+  .sun-graphic{
+    position:absolute; right:-30px; top:-30px; width:150px; height:150px;
+    border-radius:50%; background:radial-gradient(circle at 35% 35%, var(--sun), var(--mango));
+    opacity:.9; filter:blur(0px);
+  }
+  .wave{
+    position:absolute; left:0; right:0; bottom:-2px; height:40px;
+    background:var(--card);
+    -webkit-mask-image: radial-gradient(24px 24px at 24px 0, transparent 98%, #000 100%);
+    -webkit-mask-size: 48px 24px; -webkit-mask-repeat: repeat-x; -webkit-mask-position: bottom;
+    mask-image: radial-gradient(24px 24px at 24px 0, transparent 98%, #000 100%);
+    mask-size: 48px 24px; mask-repeat: repeat-x; mask-position: bottom;
+  }
+
+  main{background:var(--card);}
+  .step{
+    padding:34px 20px; border-bottom:1px solid var(--line);
+    scroll-margin-top:96px;
+  }
+  .step-head{display:flex; gap:14px; align-items:flex-start; margin-bottom:12px;}
+  .num{
+    font-family:'Space Mono',monospace; font-weight:700; font-size:14px;
+    width:34px; height:34px; min-width:34px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--sun); color:var(--ink); border:1px solid var(--line);
+  }
+  .step h2{font-size:21px; font-weight:600;}
+  .step .lede{font-size:13.5px; color:#5b6a72; margin-top:3px;}
+  .step-body{font-size:14.5px; line-height:1.7; color:#33424b;}
+  .step-body p{margin:8px 0;}
+
+  .tags{display:flex; flex-wrap:wrap; gap:7px; margin:12px 0;}
+  .tag{
+    font-size:12.5px; padding:5px 10px; border-radius:8px;
+    background:#FFF2E0; border:1px solid var(--line); color:var(--ink);
+  }
+  .tag.blue{background:#E4F6F4; }
+  .tag.warn{background:#FFE8E5; color:#B8362A;}
+
+  details{
+    margin-top:14px; border:1px solid var(--line); border-radius:12px;
+    background:#fffefb; overflow:hidden;
+  }
+  summary{
+    cursor:pointer; list-style:none; padding:11px 14px;
+    font-family:'Space Mono',monospace; font-size:12px; font-weight:700;
+    color:var(--lagoon); display:flex; align-items:center; justify-content:space-between;
+  }
+  summary::-webkit-details-marker{display:none;}
+  summary::after{content:"+"; font-size:16px; color:var(--coral);}
+  details[open] summary::after{content:"–";}
+  .details-body{padding:0 14px 16px; font-size:13.5px; line-height:1.7; color:#33424b;}
+
+  table{width:100%; border-collapse:collapse; font-size:12.5px; margin:6px 0;}
+  th,td{text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top;}
+  th{font-family:'Space Mono',monospace; font-size:11px; color:var(--lagoon); font-weight:700;}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;}
+  .mini-card{
+    border:1px solid var(--line); border-radius:10px; padding:10px;
+    background:#fff; font-size:12.5px;
+  }
+  .mini-card .stars{color:var(--coral); font-size:12px;}
+  .mini-card b{display:block; font-size:13px; margin-bottom:3px;}
+
+  /* template tabs */
+  .tabs{display:flex; gap:6px; margin-top:12px;}
+  .tab-btn{
+    flex:1; font-family:'Space Mono',monospace; font-size:12px; font-weight:700;
+    padding:8px 0; border-radius:8px; border:1px solid var(--line);
+    background:#fff; color:var(--ink); cursor:pointer;
+  }
+  .tab-btn.active{background:var(--coral); color:#fff; border-color:var(--coral);}
+  .tab-pane{display:none; margin-top:10px; font-size:13px; line-height:1.7; background:#FFF9EE; border:1px solid var(--line); border-radius:10px; padding:12px 14px; white-space:pre-wrap; font-family:'Space Mono',monospace;}
+  .tab-pane.active{display:block;}
+
+  /* xhs mockup */
+  .phone{
+    max-width:300px; margin:16px auto 0; border-radius:26px; padding:12px;
+    background:#111; box-shadow:0 14px 30px rgba(0,0,0,.18);
+  }
+  .phone-screen{background:#fff; border-radius:18px; overflow:hidden;}
+  .cover{
+    height:180px; position:relative;
+    background:
+      radial-gradient(circle at 30% 30%, #FF8A7A, transparent 55%),
+      radial-gradient(circle at 75% 70%, #FFD966, transparent 50%),
+      linear-gradient(160deg,#1E9C93,#FF6F5E);
+  }
+  .cover .cov-title{
+    position:absolute; left:12px; bottom:12px; right:12px;
+    color:#fff; font-family:'Fraunces',serif; font-weight:700; font-size:19px; line-height:1.25;
+    text-shadow:0 2px 8px rgba(0,0,0,.25);
+  }
+  .post-body{padding:12px 14px 16px;}
+  .post-meta{display:flex; align-items:center; gap:8px; font-size:12px; color:#5b6a72; margin-bottom:8px;}
+  .avatar{width:20px; height:20px; border-radius:50%; background:linear-gradient(135deg,var(--mango),var(--coral));}
+  .post-text{font-size:12.5px; line-height:1.6; color:var(--ink);}
+  .post-tags{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;}
+  .post-tags span{font-size:11px; color:var(--lagoon); background:#EAF7F5; padding:3px 8px; border-radius:6px;}
+  .post-actions{display:flex; gap:16px; margin-top:12px; font-size:12px; color:#5b6a72;}
+
+  .checklist{margin-top:14px; font-size:13px;}
+  .checklist div{display:flex; gap:8px; padding:5px 0; border-bottom:1px dashed var(--line);}
+  .checklist span.box{width:16px; height:16px; border-radius:4px; border:1px solid var(--lagoon); flex:0 0 auto;}
+
+  .path-cards{display:flex; flex-direction:column; gap:10px; margin-top:12px;}
+  .path-card{border:1px solid var(--line); border-radius:12px; padding:12px 14px; background:#fff;}
+  .path-card b{font-family:'Space Mono',monospace; font-size:12px; color:var(--coral);}
+  pre.code{
+    background:#1b2530; color:#d9f7f1; font-family:'Space Mono',monospace; font-size:11.5px;
+    padding:10px 12px; border-radius:8px; overflow-x:auto; margin-top:8px;
+  }
+
+  footer{padding:36px 20px 60px; text-align:center;}
+  .bubble{
+    text-align:left; max-width:480px; margin:10px auto; padding:12px 14px;
+    border-radius:14px; font-size:13px; line-height:1.7;
+  }
+  .bubble.user{background:#FFE9DF; border-bottom-right-radius:4px;}
+  .bubble.agent{background:#EAF7F5; border-bottom-left-radius:4px;}
+  footer .sign{margin-top:26px; font-family:'Space Mono',monospace; font-size:11px; color:#8a978f;}
+</style>
+</head>
+<body>
+
+<div id="tide"></div>
+
+<header class="top">
+  <div class="brand">
+    <span class="brand-name">🍉 内容工厂</span>
+    <span class="eyebrow">summer edition</span>
+  </div>
+  <nav class="steps-nav">
+    <a class="chip" href="#step-0">0 参考</a>
+    <a class="chip" href="#step-1">1 选题</a>
+    <a class="chip" href="#step-2">2 决策</a>
+    <a class="chip" href="#step-3">3 素材</a>
+    <a class="chip" href="#step-4">4 文案</a>
+    <a class="chip" href="#step-45">4.5 审核</a>
+    <a class="chip" href="#step-5">5 配图</a>
+    <a class="chip" href="#step-6">6 排版</a>
+    <a class="chip" href="#step-7">7 发布</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="sun-graphic"></div>
+  <div class="wrap">
+    <p class="eyebrow">WORKFLOW · 9 STEPS</p>
+    <h1>选题晒到发布<br><em>一条龙</em>搞定的<br>小红书内容工厂</h1>
+    <p>从市场调研、选题决策、文案撰写到视觉策略与排版发布，Agent 完成 80% 的重复劳动，你只在关键节点确认事实与风格 —— 像一杯冰镇气泡水，清爽高效。</p>
+  </div>
+  <div class="wave"></div>
+</section>
+
+<main>
+
+  <!-- STEP 0 -->
+  <section class="step" id="step-0">
+    <div class="step-head">
+      <div class="num">0</div>
+      <div>
+        <h2>参考信息收集</h2>
+        <p class="lede">产品资料是"边界"，不是"选题来源"</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>开始前先问用户是否有产品 brief、客户画像或爆款笔记参考。这些资料告诉 Agent「你是谁、卖什么」，但选题灵感依然要靠市场调研获取 —— 有资料也不能跳过 WebSearch。</p>
+      <div class="tags">
+        <span class="tag">🥇 用户文件 = 权威边界</span>
+        <span class="tag blue">🥈 口头描述 = 补充细节</span>
+        <span class="tag">🥉 WebSearch = 市场弹药</span>
+      </div>
+      <details>
+        <summary>展开：信息如何影响后续流程</summary>
+        <div class="details-body">
+          <table>
+            <tr><th>用户提供</th><th>作用</th></tr>
+            <tr><td>产品 brief</td><td>选题与素材搜索的权威来源，卖点必须精确匹配</td></tr>
+            <tr><td>品牌调性/画像</td><td>强制约束语气、emoji 风格、正文模板选择</td></tr>
+            <tr><td>爆款笔记</td><td>复用已验证的标题公式与结构</td></tr>
+            <tr><td>风格要求</td><td>写入 Step4 的强制约束条件</td></tr>
+          </table>
+          <p>冲突处理：WebSearch 与用户资料冲突 → 以用户资料为准；用户资料与 Agent 判断不一致 → 先确认，不擅自覆盖。</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- STEP 1 -->
+  <section class="step" id="step-1">
+    <div class="step-head">
+      <div class="num">1</div>
+      <div>
+        <h2>选题挖掘</h2>
+        <p class="lede">WebSearch 市场调研 → 候选选题池</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>搜索领域热门话题、竞品打法、内容空白与季节窗口期，回到产品资料验证边界，输出一张候选选题表（选题方向 / 目标人群 / 热度 / 难度 / 推荐理由）。</p>
+      <div class="tags">
+        <span class="tag">🧩 教程类</span><span class="tag">🔥 避坑类</span>
+        <span class="tag">📊 测评类</span><span class="tag">💰 种草类</span>
+        <span class="tag">❓ 问答类</span><span class="tag">📖 故事类</span>
+        <span class="tag">🔢 数字类</span><span class="tag">🆚 对比类</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="step" id="step-2">
+    <div class="step-head">
+      <div class="num">2</div>
+      <div>
+        <h2>选题决策</h2>
+        <p class="lede">推荐算法综合四个维度</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <div class="grid2">
+        <div class="mini-card"><b>热度潜力</b>搜索量大且上升中</div>
+        <div class="mini-card"><b>竞争度</b>现有内容少 = 蓝海</div>
+        <div class="mini-card"><b>匹配度</b>符合定位和资源</div>
+        <div class="mini-card"><b>可执行性</b>素材可得、难度适中</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="step" id="step-3">
+    <div class="step-head">
+      <div class="num">3</div>
+      <div>
+        <h2>素材收集</h2>
+        <p class="lede">围绕选题自动收集五类素材</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <div class="tags">
+        <span class="tag">竞品参考笔记</span>
+        <span class="tag blue">数据/事实</span>
+        <span class="tag">图片灵感</span>
+        <span class="tag blue">金句/语录</span>
+        <span class="tag">话题标签</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="step" id="step-4">
+    <div class="step-head">
+      <div class="num">4</div>
+      <div>
+        <h2>文案撰写</h2>
+        <p class="lede">标题 ≤ 20 单位 · 四套正文模板</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>按 3-5 个爆款标题公式各生成候选，过滤超长内容，展示 TOP3 供选择：数字+利益、反差+好奇、痛点+解决、身份+秘密、时间+结果、对象+评价、警告+反转。</p>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="a">A 干货</button>
+        <button class="tab-btn" data-tab="b">B 好物</button>
+        <button class="tab-btn" data-tab="c">C 故事</button>
+        <button class="tab-btn" data-tab="d">D 观点</button>
+      </div>
+      <div class="tab-pane active" id="tab-a">开头：痛点共鸣+效果预告
+正文：分步骤讲解（步骤1/2/3+细节tips）
+结尾：总结+互动引导
+标签：#相关话题</div>
+      <div class="tab-pane" id="tab-b">开头：场景引入+"挖到宝了"
+正文：产品亮点+使用体验+对比
+结尾：购买信息+注意事项
+标签：#好物 #推荐</div>
+      <div class="tab-pane" id="tab-c">开头：悬念/冲突
+正文：经历叙述+心路变化+关键转折
+结尾：感悟升华+互动提问
+标签：#日常 #分享</div>
+      <div class="tab-pane" id="tab-d">开头：抛出争议/反常识观点
+正文：论点1+论据 → 论点2+论据 → 论点3
+结尾：总结立场+"你怎么看？"
+标签：#观点 #讨论</div>
+
+      <details>
+        <summary>展开：标签生成规则</summary>
+        <div class="details-body">
+          <table>
+            <tr><th>类型</th><th>数量</th><th>示例</th></tr>
+            <tr><td>核心大词</td><td>2-3</td><td>#护肤 #美妆</td></tr>
+            <tr><td>精准长尾词</td><td>2-3</td><td>#油皮亲妈 #平价好物</td></tr>
+            <tr><td>流量蹭取词</td><td>1-2</td><td>#我的护肤日常</td></tr>
+            <tr><td>话题词</td><td>1</td><td>当前热门话题</td></tr>
+          </table>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- STEP 4.5 -->
+  <section class="step" id="step-45">
+    <div class="step-head">
+      <div class="num">4.5</div>
+      <div>
+        <h2>内容审核校对</h2>
+        <p class="lede">产品事实的最后一道防线</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>文案（标题+正文+标签）产出后必须先交用户核对：特色描述是否准确、数据案例是否属实、语气是否符合要求。用户确认前<b>绝不进入配图规划</b> —— 正文错了，配图必然跟着错。</p>
+    </div>
+  </section>
+
+  <!-- STEP 5 -->
+  <section class="step" id="step-5">
+    <div class="step-head">
+      <div class="num">5</div>
+      <div>
+        <h2>配图规划</h2>
+        <p class="lede">视觉策略体系：赛道分析→信息密度→模块化文案</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>图片不是宣传海报，是正文的视觉入口：图片主题、标题、卖点、结构必须与正文逐一对应，不虚构、不夸大。</p>
+      <div class="grid2">
+        <div class="mini-card"><b>教育/知识</b><span class="stars">★★★★★</span> 150-350字/页</div>
+        <div class="mini-card"><b>家居/产品</b><span class="stars">★★★</span> 50-150字/页</div>
+        <div class="mini-card"><b>美妆/母婴</b><span class="stars">★★</span> 30-100字/页</div>
+        <div class="mini-card"><b>餐饮/旅游</b><span class="stars">★</span> 20-80字/页</div>
+      </div>
+      <div class="tags" style="margin-top:14px">
+        <span class="tag warn">❌ 虚构信息</span>
+        <span class="tag warn">❌ 虚假数据</span>
+        <span class="tag warn">❌ 绝对化用语</span>
+      </div>
+      <details>
+        <summary>展开：默认图片结构</summary>
+        <div class="details-body">
+          <p><b>封面</b> — 强痛点/强场景，主标题10-20字+副标题+核心卖点(≤3条)</p>
+          <p><b>内页1</b> — 用户为什么需要关注</p>
+          <p><b>内页2</b> — 解决方案</p>
+          <p><b>内页3</b> — 信任/价值/行动理由</p>
+          <p>默认 1 封面 + 3 内页，信息不足则减少、信息丰富则增加。</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- STEP 6 -->
+  <section class="step" id="step-6">
+    <div class="step-head">
+      <div class="num">6</div>
+      <div>
+        <h2>排版输出</h2>
+        <p class="lede">发布就绪的最终版本预览</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>把标题、正文、标签与配图文案整合为最终发布内容，附带一张发布检查清单。</p>
+
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="cover"><div class="cov-title">5个挑瑜伽服的细节<br>第3个99%的人忽略</div></div>
+          <div class="post-body">
+            <div class="post-meta"><div class="avatar"></div> 内容工厂 · 刚刚</div>
+            <div class="post-text">夏天挑瑜伽服总踩坑？这5个细节帮你一次挑对，第3条真的很多人不知道…</div>
+            <div class="post-tags"><span>#瑜伽服</span><span>#平价好物</span><span>#运动穿搭</span></div>
+            <div class="post-actions">♡ 128 　★ 收藏 　💬 评论</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist">
+        <div><span class="box"></span>标题长度 ≤ 20 单位</div>
+        <div><span class="box"></span>配图 1 封面 + N 内页</div>
+        <div><span class="box"></span>内容真实性：均有正文依据</div>
+        <div><span class="box"></span>敏感词检查：通过</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 7 -->
+  <section class="step" id="step-7">
+    <div class="step-head">
+      <div class="num">7</div>
+      <div>
+        <h2>发布</h2>
+        <p class="lede">手动确认，或桥接自动发布</p>
+      </div>
+    </div>
+    <div class="step-body">
+      <div class="path-cards">
+        <div class="path-card"><b>方式 A</b> · 手动复制发布 — 输出可直接粘贴到 App 的内容块，用户自行确认发布。</div>
+        <div class="path-card">
+          <b>方式 B</b> · XHS Bridge 自动发布
+          <pre class="code">python cli.py publish \
+  --title-file title.txt \
+  --content-file content.txt \
+  --images "pic1.jpg" "pic2.jpg"</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p class="eyebrow" style="margin-bottom:14px">使用示例</p>
+  <div class="bubble user">我卖瑜伽服的，帮我做一期小红书内容</div>
+  <div class="bubble agent">0 询问参考资料 → 1 搜索瑜伽服热点 → 2 推荐选题 → 3 收集素材 → 4 生成文案 → 4.5 用户审核 → 5 配图规划 → 6 排版输出 → 7 确认发布</div>
+  <p class="sign">🍉 内容工厂 · 夏日版 · 全流程 9 步</p>
+</footer>
+
+<script>
+  // tide progress
+  const tide = document.getElementById('tide');
+  function updateTide(){
+    const h = document.documentElement;
+    const scrolled = h.scrollTop;
+    const max = h.scrollHeight - h.clientHeight;
+    tide.style.width = (max > 0 ? (scrolled / max) * 100 : 0) + '%';
+  }
+  document.addEventListener('scroll', updateTide);
+  updateTide();
+
+  // template tabs
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
